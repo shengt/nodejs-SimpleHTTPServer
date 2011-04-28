@@ -4,27 +4,28 @@
 var http = require('http'),
 	port = 8000,
 	urlParser = require('url'),
-	fs = require('fs');
+	fs = require('fs'),
+	path = require('path');
 
 var cachedStat = {
     table: {},
-    fileStatSync: function(path) {
-        if (!cachedStat.table[path]) {
-            cachedStat.table[path] = fs.statSync(path);
+    fileStatSync: function(fpath) {
+        if (!cachedStat.table[fpath]) {
+            cachedStat.table[fpath] = fs.statSync(fpath);
         }
-        return cachedStat.table[path];
+        return cachedStat.table[fpath];
     },
-    fileStat: function(path, callback) {
-        if (cachedStat.table[path]) {
-            callback(null, cachedStat.table[path]);
+    fileStat: function(fpath, callback) {
+        if (cachedStat.table[fpath]) {
+            callback(null, cachedStat.table[fpath]);
         } else {
             var cb = function(err, _stat) {
                 if (!err) {
-                    cachedStat.table[path] = _stat;
+                    cachedStat.table[fpath] = _stat;
                     callback(err, _stat);
                 }
-            }
-            fs.stat(path, cb);
+            };
+            fs.stat(fpath, cb);
         }
     }
 };
@@ -33,7 +34,7 @@ http.createServer(function(request, response) {
 	var urlObject = urlParser.parse(request.url, true);
 	console.log("[" + (new Date()).toUTCString() + "] " + '"' + request.method + " " + urlObject.pathname + "\"");
 	
-	var filePath = __dirname + urlObject.pathname;
+	var filePath = path.join(__dirname, urlObject.pathname);
 	cachedStat.fileStat(filePath, function(err, stats) {
 		if (!err) {
 			if (stats.isFile()) {
@@ -53,13 +54,13 @@ http.createServer(function(request, response) {
             			response.write("<ul style='list-style:none;font-family:courier new;'>");
 					    files.unshift(".", "..");
 						files.forEach(function(item) {
-						    var path = urlObject.pathname + item,
-						        itemStats = cachedStat.fileStatSync(__dirname + path);
+						    var urlpath = urlObject.pathname + item,
+						        itemStats = cachedStat.fileStatSync(__dirname + urlpath);
 						    if (itemStats.isDirectory()) {
-						        path += "/";
+						        urlpath += "/";
 						        item += "/";
 						    }
-							response.write("<li><a href='" + path + "'>" + item + "</a></li>")
+							response.write("<li><a href='" + urlpath + "'>" + item + "</a></li>");
 						});
             			response.end("</ul></body></html>");
 					} else {

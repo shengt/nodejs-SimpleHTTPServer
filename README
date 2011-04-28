@@ -1,0 +1,4 @@
+This is a NodeJS version Python SimpleHTTPServer.
+
+Usage:
+node SimpleHTTPServer.js
