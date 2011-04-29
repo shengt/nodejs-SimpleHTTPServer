@@ -5,7 +5,8 @@ var http = require('http'),
 	port = 8000,
 	urlParser = require('url'),
 	fs = require('fs'),
-	path = require('path');
+	path = require('path'),
+	current_dir = process.cwd();
 
 var cachedStat = {
     table: {},
@@ -34,7 +35,7 @@ http.createServer(function(request, response) {
 	var urlObject = urlParser.parse(request.url, true);
 	console.log("[" + (new Date()).toUTCString() + "] " + '"' + request.method + " " + urlObject.pathname + "\"");
 	
-	var filePath = path.join(__dirname, urlObject.pathname);
+	var filePath = path.join(current_dir, urlObject.pathname);
 	cachedStat.fileStat(filePath, function(err, stats) {
 		if (!err) {
 			if (stats.isFile()) {
@@ -55,7 +56,7 @@ http.createServer(function(request, response) {
 					    files.unshift(".", "..");
 						files.forEach(function(item) {
 						    var urlpath = urlObject.pathname + item,
-						        itemStats = cachedStat.fileStatSync(__dirname + urlpath);
+						        itemStats = cachedStat.fileStatSync(current_dir + urlpath);
 						    if (itemStats.isDirectory()) {
 						        urlpath += "/";
 						        item += "/";
@@ -77,4 +78,4 @@ http.createServer(function(request, response) {
 }).listen(port);
 
 console.log("Server running at http://localhost" + ((port === 80) ? "" : ":") + port + "/");
-console.log("Base directory at " + __dirname);
+console.log("Base directory at " + current_dir);
