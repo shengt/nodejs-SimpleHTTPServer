@@ -32,10 +32,11 @@ var cachedStat = {
 };
 
 http.createServer(function(request, response) {
-	var urlObject = urlParser.parse(request.url, true);
-	console.log("[" + (new Date()).toUTCString() + "] " + '"' + request.method + " " + urlObject.pathname + "\"");
+	var urlObject = urlParser.parse(request.url, true),
+		pathname = decodeURIComponent(urlObject.pathname);
+	console.log("[" + (new Date()).toUTCString() + "] " + '"' + request.method + " " + pathname + "\"");
 	
-	var filePath = path.join(current_dir, urlObject.pathname);
+	var filePath = path.join(current_dir, pathname);
 	cachedStat.fileStat(filePath, function(err, stats) {
 		if (!err) {
 			if (stats.isFile()) {
@@ -55,7 +56,7 @@ http.createServer(function(request, response) {
             			response.write("<ul style='list-style:none;font-family:courier new;'>");
 					    files.unshift(".", "..");
 						files.forEach(function(item) {
-						    var urlpath = urlObject.pathname + item,
+						    var urlpath = pathname + item,
 						        itemStats = cachedStat.fileStatSync(current_dir + urlpath);
 						    if (itemStats.isDirectory()) {
 						        urlpath += "/";
