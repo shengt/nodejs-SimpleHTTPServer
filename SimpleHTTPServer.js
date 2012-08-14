@@ -23,8 +23,8 @@ var cachedStat = {
             var cb = function(err, _stat) {
                 if (!err) {
                     cachedStat.table[fpath] = _stat;
-                    callback(err, _stat);
                 }
+                callback(err, _stat);
             };
             fs.stat(fpath, cb);
         }
