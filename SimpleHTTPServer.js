@@ -50,6 +50,12 @@ http.createServer(function(request, response) {
 			} else if (stats.isDirectory()) {
 				fs.readdir(filePath, function(error, files) {
 					if (!error) {
+						files.sort(function(a, b) {
+							if (a.toLowerCase() < b.toLowerCase(ase()) return -1;
+								if (a.toLowerCase() > b.toLowerCase()) return 1;
+								return 0;
+						});
+																				
             			response.writeHead(200, {'Content-Type': 'text/html'});
             			response.write("<!DOCTYPE html>\n<html><head><meta charset='UTF-8'><title>" + filePath + "</title></head><body>");
             			response.write("<h1>" + filePath + "</h1>");
