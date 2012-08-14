@@ -34,7 +34,7 @@ var cachedStat = {
 http.createServer(function(request, response) {
 	var urlObject = urlParser.parse(request.url, true),
 		pathname = decodeURIComponent(urlObject.pathname);
-	console.log("[" + (new Date()).toUTCString() + "] " + '"' + request.method + " " + pathname + "\"");
+	console.log("[" + (new Date).toString() + "] " + request.connection.remoteAddress  + ': "' + request.method + " " + pathname + "\"");
 	
 	var filePath = path.join(current_dir, pathname);
 	cachedStat.fileStat(filePath, function(err, stats) {
