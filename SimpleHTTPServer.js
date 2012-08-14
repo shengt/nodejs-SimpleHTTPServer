@@ -46,7 +46,7 @@ http.createServer(function(request, response) {
 						var chunksize = 1024 * 1024
 						var position = 0;
 
-        				response.writeHead(200, {
+						response.writeHead(200, {
 							'Content-Length' : stats.size 
 						});
 
@@ -56,11 +56,11 @@ http.createServer(function(request, response) {
 							fs.read(fd, buffer, 0, chunksize, position, function (err, bytesRead) {
 								if(err) {
 									// TODO: error
-        							response.end();
+									response.end();
 									response.removeListener("drain", readFunc);
 								}
 								else if(bytesRead == 0) {
-        							response.end();
+									response.end();
 									response.removeListener("drain", readFunc);
 								}
 								else {
@@ -88,30 +88,30 @@ http.createServer(function(request, response) {
 							return 0;
 						});
 
-            			response.writeHead(200, {'Content-Type': 'text/html'});
-            			response.write("<!DOCTYPE html>\n<html><head><meta charset='UTF-8'><title>" + filePath + "</title></head><body>");
-            			response.write("<h1>" + filePath + "</h1>");
-            			response.write("<ul style='list-style:none;font-family:courier new;'>");
-					    files.unshift(".", "..");
+						response.writeHead(200, {'Content-Type': 'text/html'});
+						response.write("<!DOCTYPE html>\n<html><head><meta charset='UTF-8'><title>" + filePath + "</title></head><body>");
+						response.write("<h1>" + filePath + "</h1>");
+						response.write("<ul style='list-style:none;font-family:courier new;'>");
+						files.unshift(".", "..");
 						files.forEach(function(item) {
-						    var urlpath = pathname + item,
-						        itemStats = cachedStat.fileStatSync(current_dir + urlpath);
-						    if (itemStats.isDirectory()) {
-						        urlpath += "/";
-						        item += "/";
-						    }
+							var urlpath = pathname + item,
+								itemStats = cachedStat.fileStatSync(current_dir + urlpath);
+							if (itemStats.isDirectory()) {
+								urlpath += "/";
+								item += "/";
+							}
 							response.write("<li><a href='" + urlpath + "'>" + item + "</a></li>");
 						});
-            			response.end("</ul></body></html>");
+						response.end("</ul></body></html>");
 					} else {
-					    // Read dir error
-					    response.writeHead(500, {});
+						// Read dir error
+						response.writeHead(500, {});
 					}
 				});
 			}
 		} else {
-		    response.writeHead(404, {});
-		    response.end("File not found!");
+			response.writeHead(404, {});
+			response.end("File not found!");
 		}
 	});
 }).listen(port);
