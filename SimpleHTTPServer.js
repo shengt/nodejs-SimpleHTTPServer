@@ -43,30 +43,40 @@ http.createServer(function(request, response) {
 
 				fs.open(filePath, 'r', function(err, fd) {
 					if(!err) {
-						var chunksize = 512 * 1024
+						var chunksize = 1024 * 1024
+						var position = 0;
 
         				response.writeHead(200, {
-							'Content-Length' : fs.statSync(filePath).size 
+							'Content-Length' : stats.size 
 						});
 
-						var readFunc = function(position) {
+
+						var readFunc = function() {
 							var buffer = new Buffer(chunksize);
 							fs.read(fd, buffer, 0, chunksize, position, function (err, bytesRead) {
 								if(err) {
 									// TODO: error
         							response.end();
+									response.removeListener("drain", readFunc);
 								}
 								else if(bytesRead == 0) {
         							response.end();
+									response.removeListener("drain", readFunc);
 								}
 								else {
-									response.write(buffer.slice(0, bytesRead));
-									readFunc(position + chunksize);
+									position += chunksize;
+									if(response.write(buffer.slice(0, bytesRead))) {
+										buffer = null;
+										readFunc();
+									} else {
+										buffer = null;
+									}
 								}
 							});
 						};
 
-						readFunc(0);
+						response.on("drain", readFunc);
+						readFunc();
 					}
 				});
 			} else if (stats.isDirectory()) {
