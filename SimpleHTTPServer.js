@@ -40,22 +40,44 @@ http.createServer(function(request, response) {
 	cachedStat.fileStat(filePath, function(err, stats) {
 		if (!err) {
 			if (stats.isFile()) {
-			    fs.readFile(filePath, function(err, data) {
-			        if (!err) {
-        				response.writeHead(200, {});
-        				response.write(data);
-        				response.end();
-			        }
-			    });
+
+				fs.open(filePath, 'r', function(err, fd) {
+					if(!err) {
+						var chunksize = 512 * 1024
+
+        				response.writeHead(200, {
+							'Content-Length' : fs.statSync(filePath).size 
+						});
+
+						var readFunc = function(position) {
+							var buffer = new Buffer(chunksize);
+							fs.read(fd, buffer, 0, chunksize, position, function (err, bytesRead) {
+								if(err) {
+									// TODO: error
+        							response.end();
+								}
+								else if(bytesRead == 0) {
+        							response.end();
+								}
+								else {
+									response.write(buffer.slice(0, bytesRead));
+									readFunc(position + chunksize);
+								}
+							});
+						};
+
+						readFunc(0);
+					}
+				});
 			} else if (stats.isDirectory()) {
 				fs.readdir(filePath, function(error, files) {
 					if (!error) {
 						files.sort(function(a, b) {
-							if (a.toLowerCase() < b.toLowerCase(ase()) return -1;
-								if (a.toLowerCase() > b.toLowerCase()) return 1;
-								return 0;
+							if (a.toLowerCase() < b.toLowerCase()) return -1;
+							if (a.toLowerCase() > b.toLowerCase()) return 1;
+							return 0;
 						});
-																				
+
             			response.writeHead(200, {'Content-Type': 'text/html'});
             			response.write("<!DOCTYPE html>\n<html><head><meta charset='UTF-8'><title>" + filePath + "</title></head><body>");
             			response.write("<h1>" + filePath + "</h1>");
