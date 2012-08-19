@@ -100,7 +100,7 @@ http.createServer(function(request, response) {
 								urlpath += "/";
 								item += "/";
 							}
-							response.write("<li><a href='" + encodeURI(urlpath) + "'>" + item + "</a></li>");
+							response.write('<li><a href="' + encodeURI(urlpath) + '">' + item + '</a></li>');
 						});
 						response.end("</ul></body></html>");
 					} else {
