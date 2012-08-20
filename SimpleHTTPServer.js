@@ -100,13 +100,15 @@ http.createServer(function (request, response) {
                         files.forEach(function (item) {
                             var urlPath = pathname + item;
                             cachedStat.fileStat(currentDir + urlPath, function (err, itemStats) {
-                                if (itemStats.isDirectory()) {
-                                    urlPath += "/";
-                                    item += "/";
-                                }
-                                response.write('<li><a href="' + encodeURI(urlPath) + '">' + item + '</a></li>');
-                                if (++count >= total) {
-                                    response.end("</ul></body></html>");
+                                if (!err) {
+                                    if (itemStats.isDirectory()) {
+                                        urlPath += "/";
+                                        item += "/";
+                                    }
+                                    response.write('<li><a href="' + encodeURI(urlPath) + '">' + item + '</a></li>');
+                                    if (++count >= total) {
+                                        response.end("</ul></body></html>");
+                                    }
                                 }
                             });
                         });
