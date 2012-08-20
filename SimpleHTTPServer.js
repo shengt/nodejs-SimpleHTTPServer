@@ -57,7 +57,7 @@ http.createServer(function (request, response) {
                                 fs.read(fd, buffer, 0, chunkSize, position, function (err, bytesRead) {
                                     if (err) {
                                         // TODO: error
-                                        response.end();
+                                        response.end("File read error.");
                                         response.removeListener("drain", readFunc);
                                     } else if (bytesRead === 0) {
                                         response.end();
@@ -93,7 +93,7 @@ http.createServer(function (request, response) {
 
                         response.writeHead(200, {'Content-Type': 'text/html'});
                         response.write("<!DOCTYPE html>\n<html><head><meta charset='UTF-8'><title>" + filePath + "</title></head><body>");
-                        response.write("<h1>" + filePath + "</h1>");
+                        response.write("<h2>Directory listing for " + filePath + "</h2>");
                         response.write("<ul style='list-style:none;font-family:courier new;'>");
 
                         files.unshift(".", "..");
@@ -113,6 +113,7 @@ http.createServer(function (request, response) {
                     } else {
                         // Read dir error
                         response.writeHead(500, {});
+                        response.end("Server Error");
                     }
                 });
             }
