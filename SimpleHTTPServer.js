@@ -10,7 +10,7 @@ var http = require('http'),
     urlParser = require('url'),
     fs = require('fs'),
     path = require('path'),
-    current_dir = process.cwd(),
+    currentDir = process.cwd(),
     argv = process.argv,
     port = 8000;
 
@@ -21,12 +21,6 @@ if (argv.length >= 3) {
 
 var cachedStat = {
     table: {},
-    fileStatSync: function (fpath) {
-        if (!cachedStat.table[fpath]) {
-            cachedStat.table[fpath] = fs.statSync(fpath);
-        }
-        return cachedStat.table[fpath];
-    },
     fileStat: function (fpath, callback) {
         if (cachedStat.table[fpath]) {
             callback(null, cachedStat.table[fpath]);
@@ -44,10 +38,11 @@ var cachedStat = {
 
 http.createServer(function (request, response) {
     var urlObject = urlParser.parse(request.url, true),
-        pathname = decodeURIComponent(urlObject.pathname);
+        pathname = decodeURIComponent(urlObject.pathname),
+        filePath = path.join(currentDir, pathname);
+
     console.log('[' + (new Date()) + '] ' + request.connection.remoteAddress  + ': "' + request.method + ' ' + pathname + '"');
     
-    var filePath = path.join(current_dir, pathname);
     cachedStat.fileStat(filePath, function (err, stats) {
         if (!err) {
             if (stats.isFile()) {
@@ -87,7 +82,10 @@ http.createServer(function (request, response) {
             } else if (stats.isDirectory()) {
                 fs.readdir(filePath, function (error, files) {
                     if (!error) {
-                        files.sort(function(a, b) {
+                        var total = files.length + 2, // ../ and ./
+                            count = 0;
+
+                        files.sort(function (a, b) {
                             if (a.toLowerCase() < b.toLowerCase()) return -1;
                             if (a.toLowerCase() > b.toLowerCase()) return 1;
                             return 0;
@@ -97,17 +95,21 @@ http.createServer(function (request, response) {
                         response.write("<!DOCTYPE html>\n<html><head><meta charset='UTF-8'><title>" + filePath + "</title></head><body>");
                         response.write("<h1>" + filePath + "</h1>");
                         response.write("<ul style='list-style:none;font-family:courier new;'>");
+
                         files.unshift(".", "..");
                         files.forEach(function (item) {
-                            var urlpath = pathname + item,
-                                itemStats = cachedStat.fileStatSync(current_dir + urlpath);
-                            if (itemStats.isDirectory()) {
-                                urlpath += "/";
-                                item += "/";
-                            }
-                            response.write('<li><a href="' + encodeURI(urlpath) + '">' + item + '</a></li>');
+                            var urlPath = pathname + item;
+                            cachedStat.fileStat(currentDir + urlPath, function (err, itemStats) {
+                                if (itemStats.isDirectory()) {
+                                    urlPath += "/";
+                                    item += "/";
+                                }
+                                response.write('<li><a href="' + encodeURI(urlPath) + '">' + item + '</a></li>');
+                                if (++count >= total) {
+                                    response.end("</ul></body></html>");
+                                }
+                            });
                         });
-                        response.end("</ul></body></html>");
                     } else {
                         // Read dir error
                         response.writeHead(500, {});
@@ -122,4 +124,4 @@ http.createServer(function (request, response) {
 }).listen(port);
 
 console.log("Server running at http://localhost" + ((port === 80) ? "" : ":") + port + "/");
-console.log("Base directory at " + current_dir);
+console.log("Base directory at " + currentDir);
