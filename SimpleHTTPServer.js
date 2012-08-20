@@ -57,11 +57,11 @@ http.createServer(function (request, response) {
                                 fs.read(fd, buffer, 0, chunkSize, position, function (err, bytesRead) {
                                     if (err) {
                                         // TODO: error
-                                        response.end("File read error.");
-                                        response.removeListener("drain", readFunc);
+                                        response.end('File read error.');
+                                        response.removeListener('drain', readFunc);
                                     } else if (bytesRead === 0) {
                                         response.end();
-                                        response.removeListener("drain", readFunc);
+                                        response.removeListener('drain', readFunc);
                                     } else {
                                         position += chunkSize;
                                         if (response.write(buffer.slice(0, bytesRead))) {
@@ -75,7 +75,7 @@ http.createServer(function (request, response) {
                             'Content-Length' : stats.size 
                         });
 
-                        response.on("drain", readFunc);
+                        response.on('drain', readFunc);
                         readFunc();
                     }
                 });
@@ -96,18 +96,18 @@ http.createServer(function (request, response) {
                         response.write("<h2>Directory listing for " + filePath + "</h2>");
                         response.write("<ul style='list-style:none;font-family:courier new;'>");
 
-                        files.unshift(".", "..");
+                        files.unshift('.', '..');
                         files.forEach(function (item) {
                             var urlPath = pathname + item;
                             cachedStat.fileStat(currentDir + urlPath, function (err, itemStats) {
                                 if (!err) {
                                     if (itemStats.isDirectory()) {
-                                        urlPath += "/";
-                                        item += "/";
+                                        urlPath += '/';
+                                        item += '/';
                                     }
                                     response.write('<li><a href="' + encodeURI(urlPath) + '">' + item + '</a></li>');
                                     if (++count >= total) {
-                                        response.end("</ul></body></html>");
+                                        response.end('</ul></body></html>');
                                     }
                                 }
                             });
@@ -115,16 +115,16 @@ http.createServer(function (request, response) {
                     } else {
                         // Read dir error
                         response.writeHead(500, {});
-                        response.end("Server Error");
+                        response.end('Server Error');
                     }
                 });
             }
         } else {
             response.writeHead(404, {});
-            response.end("File not found!");
+            response.end('File not found!');
         }
     });
 }).listen(port);
 
-console.log("Server running at http://localhost" + ((port === 80) ? "" : ":") + port + "/");
-console.log("Base directory at " + currentDir);
+console.log('Server running at http://localhost' + ((port === 80) ? '' : (':' + port)) + '/');
+console.log('Base directory at ' + currentDir);
