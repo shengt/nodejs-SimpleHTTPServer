@@ -56,9 +56,9 @@ http.createServer(function (request, response) {
                     if(!err) {
                         var chunkSize = 1024 * 1024,
                             position = 0,
+                            buffer = new Buffer(chunkSize),
 
                             readFunc = function () {
-                                var buffer = new Buffer(chunkSize);
                                 fs.read(fd, buffer, 0, chunkSize, position, function (err, bytesRead) {
                                     if (err) {
                                         // TODO: error
@@ -72,7 +72,6 @@ http.createServer(function (request, response) {
                                         if (response.write(buffer.slice(0, bytesRead))) {
                                             readFunc();
                                         }
-                                        buffer = null;
                                     }
                                 });
                             };
