@@ -12,29 +12,29 @@ var http = require('http'),
     path = require('path'),
     currentDir = process.cwd(),
     argv = process.argv,
-    port = 8000;
+    port = 8000,
+
+    cachedStat = {
+        table: {},
+        fileStat: function (fpath, callback) {
+            if (cachedStat.table[fpath]) {
+                callback(null, cachedStat.table[fpath]);
+            } else {
+                var cb = function (err, _stat) {
+                    if (!err) {
+                        cachedStat.table[fpath] = _stat;
+                    }
+                    callback(err, _stat);
+                };
+                fs.stat(fpath, cb);
+            }
+        }
+    };
 
 if (argv.length >= 3) {
     var portNum = parseInt(argv[2], 10);
     port = isNaN(portNum) ? port : portNum;
 }
-
-var cachedStat = {
-    table: {},
-    fileStat: function (fpath, callback) {
-        if (cachedStat.table[fpath]) {
-            callback(null, cachedStat.table[fpath]);
-        } else {
-            var cb = function (err, _stat) {
-                if (!err) {
-                    cachedStat.table[fpath] = _stat;
-                }
-                callback(err, _stat);
-            };
-            fs.stat(fpath, cb);
-        }
-    }
-};
 
 http.createServer(function (request, response) {
     var urlObject = urlParser.parse(request.url, true),
