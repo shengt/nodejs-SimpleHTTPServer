@@ -64,9 +64,7 @@ http.createServer(function (request, response) {
                                         response.removeListener('drain', readFunc);
                                     } else {
                                         position += chunkSize;
-                                        if (response.write(buffer.slice(0, bytesRead))) {
-                                            readFunc();
-                                        }
+                                        response.write(buffer.slice(0, bytesRead));
                                     }
                                 });
                             };
