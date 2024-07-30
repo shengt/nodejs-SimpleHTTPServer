@@ -93,6 +93,11 @@ http.createServer(function (request, response) {
     var urlObject = urlParser.parse(request.url, true),
         pathname = decodeURIComponent(urlObject.pathname),
         filePath = path.join(currentDir, pathname);
+    if (path.normalize(decodeURIComponent(urlObject.pathname)) !== decodeURIComponent(urlObject.pathname)) {
+        response.statusCode = 403;
+        response.end();
+        return;
+    }
 
     console.log('[' + (new Date()) + '] ' + request.connection.remoteAddress  + ': "' + request.method + ' ' + pathname + '"');
     
